@@ -4,11 +4,17 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 type config struct {
 	addr   string
 	static string
+}
+
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
 }
 
 func main() {
@@ -19,16 +25,29 @@ func main() {
 
 	flag.Parse()
 
+	infoLog := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+	app := application{
+		infoLog:  infoLog,
+		errorLog: errorLog,
+	}
+
 	mux := http.NewServeMux()
 
-	fileServer := http.FileServer(http.Dir(cfg.addr))
+	fileServer := http.FileServer(http.Dir(cfg.static))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("GET /snippet/view", snippetView)
-	mux.HandleFunc("POST /snippet/create", snippetCreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("GET /snippet/view", app.snippetView)
+	mux.HandleFunc("POST /snippet/create", app.snippetCreate)
 
-	log.Printf("Starting server on %s", cfg.addr)
-	err := http.ListenAndServe(cfg.addr, mux)
-	log.Fatal(err)
+	srv := &http.Server{
+		Addr:     cfg.addr,
+		Handler:  mux,
+		ErrorLog: errorLog,
+	}
+
+	infoLog.Printf("Starting server on %s", cfg.addr)
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 }

@@ -2,10 +2,18 @@ package main
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
 )
+
+var app = application{
+	infoLog:  log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime),
+	errorLog: log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile),
+}
 
 func Test_home(t *testing.T) {
 	req, err := http.NewRequest("GET", "/", nil)
@@ -15,19 +23,19 @@ func Test_home(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	home(rr, req)
+	app.home(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler retured the wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	expected := "Hello from snippet"
+	expected := "<title>Home</title>"
 	body, err := io.ReadAll(rr.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if string(body) != expected {
+	if !strings.Contains(string(body), expected) {
 		t.Errorf("handler returned the wrong body: got %v want %v", string(body), expected)
 	}
 }
@@ -40,7 +48,7 @@ func Test_snippetView(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	snippetView(rr, req)
+	app.snippetView(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler retured the wrong status code: got %v want %v", status, http.StatusOK)
@@ -65,7 +73,7 @@ func Test_snippetCreate(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	snippetCreate(rr, req)
+	app.snippetCreate(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler retured the wrong status code: got %v want %v", status, http.StatusOK)
