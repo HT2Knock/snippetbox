@@ -15,6 +15,7 @@ type config struct {
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	cfg      config
 }
 
 func main() {
@@ -30,20 +31,12 @@ func main() {
 	app := application{
 		infoLog:  infoLog,
 		errorLog: errorLog,
+		cfg:      cfg,
 	}
-
-	mux := http.NewServeMux()
-
-	fileServer := http.FileServer(http.Dir(cfg.static))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("GET /snippet/view", app.snippetView)
-	mux.HandleFunc("POST /snippet/create", app.snippetCreate)
 
 	srv := &http.Server{
 		Addr:     cfg.addr,
-		Handler:  mux,
+		Handler:  app.routes(),
 		ErrorLog: errorLog,
 	}
 
