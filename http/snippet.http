@@ -1,0 +1,10 @@
+### 
+
+GET http://127.0.0.1:4000/snippet/view?id=1 HTTP/1.1
+
+
+### 
+
+# @curl-location
+
+POST http://127.0.0.1:4000/snippet/create HTTP/1.1
