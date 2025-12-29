@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"io/fs"
 	"path/filepath"
+	"time"
 
 	"github.com/T2Knock/snippetbox/internal/models"
 	"github.com/T2Knock/snippetbox/ui"
@@ -13,6 +14,14 @@ type templateData struct {
 	CurrentYear int
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
+}
+
+var functions = template.FuncMap{
+	"humanDate": humanDate,
+}
+
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
@@ -26,7 +35,7 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		tmpl, err := template.ParseFS(ui.Files, "html/base.html", "html/partials/*.html", page)
+		tmpl, err := template.New(name).Funcs(functions).ParseFS(ui.Files, "html/base.html", "html/partials/*.html", page)
 		if err != nil {
 			return nil, err
 		}
