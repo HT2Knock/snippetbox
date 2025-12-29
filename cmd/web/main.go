@@ -29,7 +29,7 @@ func main() {
 
 	flag.StringVar(&cfg.addr, "addr", ":4000", "HTTP network address")
 	flag.StringVar(&cfg.static, "static", "./ui/static/", "Path to static assets")
-	flag.StringVar(&cfg.dsn, "dsnc", "root:snippetbox@/snippetbox", "MySQL data source name")
+	flag.StringVar(&cfg.dsn, "dsnc", "root:snippetbox@/snippetbox?parseTime=true&loc=UTC", "MySQL data source name")
 
 	flag.Parse()
 

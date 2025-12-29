@@ -1,12 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
-	"github.com/T2Knock/snippetbox/ui"
+	"github.com/T2Knock/snippetbox/internal/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -15,23 +15,33 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"html/pages/base.html",
-		"html/partials/nav.html",
-		"html/pages/home.html",
-	}
-
-	tmpl, err := template.ParseFS(ui.Files, files...)
+	snippets, err := app.snippet.Latest()
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	err = tmpl.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.serverError(w, err)
-		return
+	for _, s := range snippets {
+		fmt.Fprintf(w, "%+v\n", s)
 	}
+
+	// files := []string{
+	// 	"html/pages/base.html",
+	// 	"html/partials/nav.html",
+	// 	"html/pages/home.html",
+	// }
+	//
+	// tmpl, err := template.ParseFS(ui.Files, files...)
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// 	return
+	// }
+	//
+	// err = tmpl.ExecuteTemplate(w, "base", nil)
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// 	return
+	// }
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +51,17 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Display a specific snippet for id %d...", id)
+	snippet, err := app.snippet.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+			return
+		}
+
+		app.serverError(w, err)
+	}
+
+	fmt.Fprintf(w, "%+v", snippet)
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
