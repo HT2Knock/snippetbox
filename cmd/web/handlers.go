@@ -3,10 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 
 	"github.com/T2Knock/snippetbox/internal/models"
+	"github.com/T2Knock/snippetbox/ui"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -59,9 +61,30 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		}
 
 		app.serverError(w, err)
+		return
 	}
 
-	fmt.Fprintf(w, "%+v", snippet)
+	files := []string{
+		"html/pages/base.html",
+		"html/partials/nav.html",
+		"html/pages/view.html",
+	}
+
+	tmpl, err := template.ParseFS(ui.Files, files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	data := &templateData{
+		Snippet: snippet,
+	}
+
+	err = tmpl.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
