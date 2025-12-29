@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -29,10 +30,14 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 		return
 	}
 
+	buf := new(bytes.Buffer)
 	w.WriteHeader(status)
 
-	err := tmpl.ExecuteTemplate(w, "base", data)
+	err := tmpl.ExecuteTemplate(buf, "base", data)
 	if err != nil {
 		app.serverError(w, err)
+		return
 	}
+
+	buf.WriteTo(w)
 }
