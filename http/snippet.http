@@ -5,7 +5,7 @@ GET http://127.0.0.1:4000 HTTP/1.1
 
 ### Snippet view
 
-GET http://127.0.0.1:4000/snippet/view?id=2 HTTP/1.1
+GET http://127.0.0.1:4000/snippet/view/2 HTTP/1.1
 
 
 ### Snippet create
