@@ -69,13 +69,9 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		app.serverError(w, err)
-		return
-	}
-
 	var form snippetCreateForm
-	if err := app.formDecoder.Decode(&form, r.PostForm); err != nil {
+
+	if err := app.decodePostForm(r, &form); err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
