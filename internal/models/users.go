@@ -44,7 +44,27 @@ func (m *UserModel) Insert(name, email, password string) error {
 }
 
 func (m *UserModel) Authenticate(email, password string) (int, error) {
-	return 0, nil
+	stmt := `SELECT id, hashed_password FROM users WHERE email = ?`
+
+	u := &User{}
+	if err := m.DB.QueryRow(stmt, email).Scan(&u.ID, &u.HASHED_PASSWORD); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrNoRecord
+		}
+
+		return 0, err
+	}
+
+	match, err := auth.CheckPasswordHash(password, string(u.HASHED_PASSWORD))
+	if err != nil {
+		return 0, nil
+	}
+
+	if !match {
+		return 0, ErrInvalidCredentials
+	}
+
+	return u.ID, nil
 }
 
 func (m *UserModel) Exist(id int) (bool, error) {
