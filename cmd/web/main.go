@@ -26,12 +26,12 @@ type config struct {
 type application struct {
 	errorLog       *log.Logger
 	infoLog        *log.Logger
-	cfg            config
 	snippets       *models.SnippetModel
 	users          *models.UserModel
-	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
+	templateCache  map[string]*template.Template
+	cfg            config
 }
 
 func main() {

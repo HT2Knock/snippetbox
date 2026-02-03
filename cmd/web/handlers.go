@@ -11,9 +11,9 @@ import (
 )
 
 type snippetCreateForm struct {
+	Expires             int    `form:"expires"`
 	Title               string `form:"title"`
 	Content             string `form:"content"`
-	Expires             int    `form:"expires"`
 	validator.Validator `form:"-"`
 }
 
